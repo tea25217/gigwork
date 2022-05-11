@@ -1,2 +1,2 @@
 # gigwork
-Script for assist my gig work
+ギグワークでつけている帳簿へのデータ取込スクリプト
