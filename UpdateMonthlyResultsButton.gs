@@ -6,7 +6,7 @@ function updateMonthlyResults() {
   const StampFiles = getTimeStampFolder(Month).getFilesByType("text/plain");
   const SheetValuesArray = convertDateToString(SpreadsheetApp.getActiveSheet().getDataRange().getValues());
   const TransposedSheetValuesArray = _.zip.apply(_, SheetValuesArray);
-  const IncentiveStartCol = SheetValuesArray[TitleRow].indexOf(IncentiveStartValue);    //時間帯インセンティブ開始列の数値表現(0-index)
+  const IncentiveStartCol = SheetValuesArray[TITLE_ROW].indexOf(INCENTIVE_START_VALUE);    //時間帯インセンティブ開始列の数値表現(0-index)
 
   generateResultsByIncentive(StampFiles, SheetValuesArray, TransposedSheetValuesArray, IncentiveStartCol)
     .updateMonthlyResultsOnSheet(SheetValuesArray, TransposedSheetValuesArray);
@@ -16,7 +16,7 @@ function updateMonthlyResults() {
 
 
 function getTimeStampFolder(Month) {
-  const Folders = DriveApp.getFolderById(TimeStampRootID).getFolders();
+  const Folders = DriveApp.getFolderById(TIME_STAMP_ROOT_ID).getFolders();
 
   while (Folders.hasNext()) {
     let childFolder = Folders.next();
@@ -44,9 +44,9 @@ function readStampFileToStringArray(stampFile) {
 }
 
 
-function getIncentiveByRow(SheetValuesArray, TitleRow, IncentiveStartCol, IncentiveSectionHours, row) {
-  const IncentiveSectionArray = SheetValuesArray[TitleRow].slice(IncentiveStartCol, IncentiveStartCol + IncentiveSectionHours);
-  const IncentiveArray = SheetValuesArray[row].slice(IncentiveStartCol, IncentiveStartCol + IncentiveSectionHours);
+function getIncentiveByRow(SheetValuesArray, IncentiveStartCol, row) {
+  const IncentiveSectionArray = SheetValuesArray[TITLE_ROW].slice(IncentiveStartCol, IncentiveStartCol + INCENTIVE_SECTION_HOURS);
+  const IncentiveArray = SheetValuesArray[row].slice(IncentiveStartCol, IncentiveStartCol + INCENTIVE_SECTION_HOURS);
   const incentive = new Map();
   IncentiveSectionArray.map((key, i) => {incentive.set(key, IncentiveArray[i])});
   return incentive
@@ -89,7 +89,7 @@ function generateResultsByIncentive(StampFiles, SheetValuesArray, TransposedShee
       let dailyStamps = readStampFileToStringArray(stampFile);
       let day = dailyStamps[0].split(",")[3].split(" ")[0].replace(/-/g, "/");
       let row = TransposedSheetValuesArray[0].indexOf(day);
-      let incentive = getIncentiveByRow(SheetValuesArray, TitleRow, IncentiveStartCol, IncentiveSectionHours, row);
+      let incentive = getIncentiveByRow(SheetValuesArray, IncentiveStartCol, row);
       let dailyResultByIncentive = aggregateDailyResultByIncentive(dailyStamps, incentive);
       results.push([day, dailyResultByIncentive])
     }
@@ -113,7 +113,7 @@ function updateMonthlyResultsOnSheet(SheetValuesArray, TransposedSheetValuesArra
       let iteratedResult = resultIterator.next();
       if (iteratedResult.done) break
       let [incentive, value] = iteratedResult.value;
-      let col = SheetValuesArray[TitleRow].indexOf(incentive);
+      let col = SheetValuesArray[TITLE_ROW].indexOf(incentive);
       Sheet.getRange(row + 1, col + 1).setValue(value)
     }
   }
